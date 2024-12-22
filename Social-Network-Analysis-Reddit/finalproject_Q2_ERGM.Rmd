@@ -1,0 +1,303 @@
+---
+title: "social network analysis"
+output: html_document
+date: "2024-11-21"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+```{r}
+#| echo: false
+#| output: false
+#| message: false
+
+# Clear your environment
+rm(list=ls())
+
+# Install packages below if you do not have them:
+# -------------------------------------------------
+if (!"statnet" %in% installed.packages()) install.packages("statnet") # For fitting ERGMs
+if (!"igraph" %in% installed.packages()) install.packages("igraph") # For network plotting
+if (!"texreg" %in% installed.packages()) install.packages("texreg") # For printing "nicer" model output
+
+library(statnet)
+
+# -----------------------------
+# Set the working directory
+# Session > Set Working Directory > To Source File Location
+# -----------------------------
+list.files() # List the files in the current working directory to see if you're in the right directory
+
+```
+
+
+
+```{r}
+# Load necessary libraries
+library(dplyr)
+
+# Read the data
+hyperlink_data <- read.delim(
+  "soc-redditHyperlinks-title.tsv", 
+  sep = "\t", 
+  header = TRUE, 
+  stringsAsFactors = FALSE, 
+  strip.white = TRUE
+)
+
+# Ensure the PROPERTIES column exists
+if (!"PROPERTIES" %in% colnames(hyperlink_data)) {
+  stop("The PROPERTIES column is missing from the dataset.")
+}
+
+# Split the PROPERTIES column into separate numeric columns
+properties <- hyperlink_data$PROPERTIES %>%
+  strsplit(",") %>%
+  lapply(as.numeric) %>%
+  do.call(rbind, .) %>%
+  as.data.frame()
+
+# Define the detailed feature names
+feature_names <- c(
+  "Number_of_characters", 
+  "Number_of_characters_without_whitespace", 
+  "Fraction_of_alphabetical_characters", 
+  "Fraction_of_digits", 
+  "Fraction_of_uppercase_characters", 
+  "Fraction_of_whitespace", 
+  "Fraction_of_special_characters", 
+  "Number_of_words", 
+  "Number_of_unique_words", 
+  "Number_of_long_words", 
+  "Average_word_length", 
+  "Number_of_unique_stopwords", 
+  "Fraction_of_stopwords", 
+  "Number_of_sentences", 
+  "Number_of_long_sentences", 
+  "Average_characters_per_sentence", 
+  "Average_words_per_sentence", 
+  "Automated_readability_index", 
+  "Positive_sentiment_VADER", 
+  "Negative_sentiment_VADER", 
+  "Compound_sentiment_VADER", 
+  "LIWC_Funct", 
+  "LIWC_Pronoun", 
+  "LIWC_Ppron", 
+  "LIWC_I", 
+  "LIWC_We", 
+  "LIWC_You", 
+  "LIWC_SheHe", 
+  "LIWC_They", 
+  "LIWC_Ipron", 
+  "LIWC_Article", 
+  "LIWC_Verbs", 
+  "LIWC_AuxVb", 
+  "LIWC_Past", 
+  "LIWC_Present", 
+  "LIWC_Future", 
+  "LIWC_Adverbs", 
+  "LIWC_Prep", 
+  "LIWC_Conj", 
+  "LIWC_Negate", 
+  "LIWC_Quant", 
+  "LIWC_Numbers", 
+  "LIWC_Swear", 
+  "LIWC_Social", 
+  "LIWC_Family", 
+  "LIWC_Friends", 
+  "LIWC_Humans", 
+  "LIWC_Affect", 
+  "LIWC_Posemo", 
+  "LIWC_Negemo", 
+  "LIWC_Anx", 
+  "LIWC_Anger", 
+  "LIWC_Sad", 
+  "LIWC_CogMech", 
+  "LIWC_Insight", 
+  "LIWC_Cause", 
+  "LIWC_Discrep", 
+  "LIWC_Tentat", 
+  "LIWC_Certain", 
+  "LIWC_Inhib", 
+  "LIWC_Incl", 
+  "LIWC_Excl", 
+  "LIWC_Percept", 
+  "LIWC_See", 
+  "LIWC_Hear", 
+  "LIWC_Feel", 
+  "LIWC_Bio", 
+  "LIWC_Body", 
+  "LIWC_Health", 
+  "LIWC_Sexual", 
+  "LIWC_Ingest", 
+  "LIWC_Relativ", 
+  "LIWC_Motion", 
+  "LIWC_Space", 
+  "LIWC_Time", 
+  "LIWC_Work", 
+  "LIWC_Achiev", 
+  "LIWC_Leisure", 
+  "LIWC_Home", 
+  "LIWC_Money", 
+  "LIWC_Relig", 
+  "LIWC_Death", 
+  "LIWC_Assent", 
+  "LIWC_Dissent", 
+  "LIWC_Nonflu", 
+  "LIWC_Filler"
+)
+
+# Ensure the number of features matches the number of columns in the properties data
+if (ncol(properties) != length(feature_names)) {
+  stop("Number of columns in PROPERTIES data does not match the number of feature names.")
+}
+
+# Rename the properties DataFrame with detailed feature names
+colnames(properties) <- feature_names
+
+# Add the processed PROPERTIES back to the main dataset
+hyperlink_data <- cbind(hyperlink_data, properties)
+
+# View the updated dataset
+head(hyperlink_data)
+
+
+```
+
+```{r}
+# Ensure the timestamp column exists and is in a proper date format
+hyperlink_data$TIMESTAMP <- as.Date(hyperlink_data$TIMESTAMP)
+hyperlink_data$TIMESTAMP <- as.Date(hyperlink_data$TIMESTAMP, format = "%Y-%m-%d")
+
+# Subset for the last six months of 2015
+subset_data <- hyperlink_data[
+  hyperlink_data$TIMESTAMP >= as.Date("2016-11-01") & 
+  hyperlink_data$TIMESTAMP <= as.Date("2016-11-30"), 
+]
+
+```
+
+```{r}
+# Remove duplicate edges (parallel links)
+subset_data <- subset_data[!duplicated(subset_data[, c("SOURCE_SUBREDDIT", "TARGET_SUBREDDIT")]), ]
+
+```
+
+```{r}
+
+# Create the network object
+network_data <- network(
+  subset_data[, c("SOURCE_SUBREDDIT", "TARGET_SUBREDDIT")],
+  directed = TRUE
+)
+
+```
+
+```{r}
+# Add node attribute for Compound_sentiment_VADER
+network_data %v% "Compound_sentiment_VADER" <- subset_data$Compound_sentiment_VADER
+
+```
+
+```{r}
+# Convert network_data to igraph object
+library(intergraph)
+igraph_network <- asIgraph(network_data)
+
+# Calculate reciprocity (dyadic closure) using igraph
+reciprocity_score <- igraph::reciprocity(igraph_network, mode = "default")
+cat("Reciprocity of the network:", reciprocity_score, "\n")
+
+# Calculate global clustering coefficient (triadic closure) using igraph
+triadic_closure <- igraph::transitivity(igraph_network, type = "global")
+cat("Global Clustering Coefficient (Triadic Closure):", triadic_closure, "\n")
+
+# In-degree and out-degree (number of incoming and outgoing edges)
+in_degree <- igraph::degree(igraph_network, mode = "in")
+out_degree <- igraph::degree(igraph_network, mode = "out")
+
+# Compute betweenness centrality using igraph
+betweenness_centrality <- igraph::betweenness(igraph_network, directed = TRUE)
+
+# Calculate and display the average betweenness centrality
+cat("Average Betweenness Centrality:", mean(betweenness_centrality), "\n")
+
+# Plotting the network
+plot.network(network_data, vertex.cex = 0.5, edge.col = "grey", main = "Subreddit Hyperlink Network")
+
+
+```
+```{r}
+# Compute in-degree and out-degree using igraph
+in_degree <- igraph::degree(igraph_network, mode = "in")
+out_degree <- igraph::degree(igraph_network, mode = "out")
+
+```
+
+```{r}
+# Subset to the largest connected component
+library(igraph)
+largest_component <- induced_subgraph(igraph_network, which(components(igraph_network)$membership == 1))
+subset_network <- asNetwork(largest_component)
+
+
+
+
+```
+```{r}
+library(ergm)
+
+# Start with a simple model
+model <- ergm(
+  subset_network ~
+    edges + 
+    mutual,
+  control = control.ergm(MCMC.effectiveSize = 50, seed = 42)
+)
+
+
+```
+
+
+```{r}
+summary(model) 
+```
+```{r}
+model_adjusted_gwesp <- ergm(
+  subset_network ~
+    edges +
+    mutual +
+    gwesp(log(0.5), fixed = TRUE),  # Reduced decay
+  control = control.ergm(
+    MCMC.effectiveSize = 50,
+    MCMC.burnin = 10000,
+    MCMC.interval = 5000,
+    MCMLE.maxit = 25,
+    seed = 42
+  )
+)
+
+
+
+```
+
+
+```{r}
+summary(model_adjusted_gwesp)
+```
+
+
+
+
+
+
+
+
+

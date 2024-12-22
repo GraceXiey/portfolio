@@ -1,0 +1,766 @@
+---
+title: "project"
+output:
+  html_document: default
+  pdf_document: default
+date: "2024-11-20"
+---
+
+```{R}
+# Install and load necessary packages
+if (!require("ggplot2")) install.packages("ggplot2")
+if (!require("dplyr")) install.packages("dplyr")
+if (!require("readr")) install.packages("readr")
+if (!require("corrplot")) install.packages("corrplot")
+
+library(ggplot2)
+library(dplyr)
+library(readr)
+library(corrplot)
+
+```
+
+
+```{R}
+# Read the TSV file
+file_path <- "~/Downloads/soc-redditHyperlinks-body_.tsv"  # Replace with your file path
+df <- read_tsv(file_path)
+
+# View the structure of the dataset
+str(df)
+
+```
+
+
+```{r}
+# Split the PROPERTIES column into separate numeric columns
+properties <- df$PROPERTIES %>%
+  strsplit(",") %>%
+  lapply(as.numeric) %>%
+  do.call(rbind, .) %>%
+  as.data.frame()
+
+# Define the detailed feature names
+feature_names <- c(
+  "Number_of_characters", 
+  "Number_of_characters_without_whitespace", 
+  "Fraction_of_alphabetical_characters", 
+  "Fraction_of_digits", 
+  "Fraction_of_uppercase_characters", 
+  "Fraction_of_whitespace", 
+  "Fraction_of_special_characters", 
+  "Number_of_words", 
+  "Number_of_unique_words", 
+  "Number_of_long_words", 
+  "Average_word_length", 
+  "Number_of_unique_stopwords", 
+  "Fraction_of_stopwords", 
+  "Number_of_sentences", 
+  "Number_of_long_sentences", 
+  "Average_characters_per_sentence", 
+  "Average_words_per_sentence", 
+  "Automated_readability_index", 
+  "Positive_sentiment_VADER", 
+  "Negative_sentiment_VADER", 
+  "Compound_sentiment_VADER", 
+  "LIWC_Funct", 
+  "LIWC_Pronoun", 
+  "LIWC_Ppron", 
+  "LIWC_I", 
+  "LIWC_We", 
+  "LIWC_You", 
+  "LIWC_SheHe", 
+  "LIWC_They", 
+  "LIWC_Ipron", 
+  "LIWC_Article", 
+  "LIWC_Verbs", 
+  "LIWC_AuxVb", 
+  "LIWC_Past", 
+  "LIWC_Present", 
+  "LIWC_Future", 
+  "LIWC_Adverbs", 
+  "LIWC_Prep", 
+  "LIWC_Conj", 
+  "LIWC_Negate", 
+  "LIWC_Quant", 
+  "LIWC_Numbers", 
+  "LIWC_Swear", 
+  "LIWC_Social", 
+  "LIWC_Family", 
+  "LIWC_Friends", 
+  "LIWC_Humans", 
+  "LIWC_Affect", 
+  "LIWC_Posemo", 
+  "LIWC_Negemo", 
+  "LIWC_Anx", 
+  "LIWC_Anger", 
+  "LIWC_Sad", 
+  "LIWC_CogMech", 
+  "LIWC_Insight", 
+  "LIWC_Cause", 
+  "LIWC_Discrep", 
+  "LIWC_Tentat", 
+  "LIWC_Certain", 
+  "LIWC_Inhib", 
+  "LIWC_Incl", 
+  "LIWC_Excl", 
+  "LIWC_Percept", 
+  "LIWC_See", 
+  "LIWC_Hear", 
+  "LIWC_Feel", 
+  "LIWC_Bio", 
+  "LIWC_Body", 
+  "LIWC_Health", 
+  "LIWC_Sexual", 
+  "LIWC_Ingest", 
+  "LIWC_Relativ", 
+  "LIWC_Motion", 
+  "LIWC_Space", 
+  "LIWC_Time", 
+  "LIWC_Work", 
+  "LIWC_Achiev", 
+  "LIWC_Leisure", 
+  "LIWC_Home", 
+  "LIWC_Money", 
+  "LIWC_Relig", 
+  "LIWC_Death", 
+  "LIWC_Assent", 
+  "LIWC_Dissent", 
+  "LIWC_Nonflu", 
+  "LIWC_Filler"
+)
+
+# Rename the properties DataFrame with detailed feature names
+colnames(properties) <- feature_names
+
+
+# Add the processed PROPERTIES back to the main dataset (if needed)
+df <- cbind(df, properties)
+
+```
+
+
+
+
+
+
+
+# Sentiment Analysis
+
+1. Sentiment vs. Text Complexity
+Analyze whether longer or more complex posts have stronger positive or negative sentiment
+
+```{r}
+library(igraph)
+
+# Create the graph from SOURCE_SUBREDDIT and TARGET_SUBREDDIT
+g <- graph_from_data_frame(df[, c("SOURCE_SUBREDDIT", "TARGET_SUBREDDIT")], directed = TRUE)
+
+# Compute degree centrality
+df$degree <- igraph::degree(g, mode = "all")[match(df$SOURCE_SUBREDDIT, V(g)$name)]
+
+# Compute clustering coefficient
+df$clustering <- transitivity(g, type = "local", isolates = "zero")[match(df$SOURCE_SUBREDDIT, V(g)$name)]
+
+
+```
+
+```{R}
+# Convert LINK_SENTIMENT to binary (0 = negative, 1 = positive)
+df$binary_sentiment <- ifelse(df$LINK_SENTIMENT == -1, 1, 0)
+
+```
+
+```{R}
+# Remove missing values (if any) in the relevant columns
+df <- na.omit(df)
+
+# Fit logistic regression model
+alaam_model <- glm(
+  binary_sentiment ~ Number_of_words + Number_of_characters + Average_word_length + degree + clustering,
+  data = df, 
+  family = binomial(link = "logit")
+)
+
+# View the model summary
+summary(alaam_model)
+
+# Extract coefficients
+cat("\nCoefficients:\n")
+print(coef(alaam_model))
+
+# Identify significant predictors
+cat("\nSignificant Predictors (p-value < 0.05):\n")
+print(summary(alaam_model)$coefficients[summary(alaam_model)$coefficients[, 4] < 0.05, ])
+
+```
+
+Text Features:
+
+Longer posts (more words) are less likely to be positive, suggesting that concise posts may be better for positive engagement.
+More characters correlate with positive sentiment, suggesting detailed posts with fewer but longer words may foster positivity.
+Posts with longer average words are more likely to be negative, indicating that simpler language could encourage positivity.
+
+Network Features:
+
+Subreddits with more connections (high degree) tend to have less positive sentiment, possibly due to exposure to diverse or conflicting discussions.
+Subreddits in tight-knit communities (high clustering) are more likely to have positive sentiment, suggesting that closely connected groups may foster positivity.
+
+```{r}
+# Perform t-tests for text complexity features
+# Number_of_characters
+t_test_characters <- t.test(
+  Number_of_characters ~ LINK_SENTIMENT,
+  data = df,
+  alternative = "two.sided"
+)
+
+# Number_of_words
+t_test_words <- t.test(
+  Number_of_words ~ LINK_SENTIMENT,
+  data = df,
+  alternative = "two.sided"
+)
+
+# Average_word_length
+t_test_word_length <- t.test(
+  Average_word_length ~ LINK_SENTIMENT,
+  data = df,
+  alternative = "two.sided"
+)
+
+# Print results
+print("T-test for Number of Characters:")
+print(t_test_characters)
+
+print("T-test for Number of Words:")
+print(t_test_words)
+
+print("T-test for Average Word Length:")
+print(t_test_word_length)
+
+```
+The t-tests comparing text complexity features between positive and negative sentiment posts reveal statistically significant differences across all measures. Negative sentiment posts are, on average, longer both in terms of the number of characters (2165.74 vs. 2053.79; p < 0.001) (Mean Difference: Posts with negative sentiment (2165.744) are 112 characters longer on average than posts with positive sentiment (2053.788)) and the number of words (346.53 vs. 324.15; p < 0.001), indicating that users tend to elaborate more when expressing dissatisfaction. Additionally, negative sentiment posts exhibit slightly longer average word lengths (5.48 vs. 5.31; p < 0.001), suggesting a tendency to use more formal or complex language. These findings highlight that negative sentiment posts are generally more verbose and linguistically detailed compared to positive sentiment posts, making text complexity a valuable set of features for sentiment classification and analysis.
+
+```{r}
+# Histogram for Number_of_characters by sentiment
+ggplot(df, aes(x = Number_of_characters, fill = as.factor(LINK_SENTIMENT))) +
+  geom_histogram(bins = 30, alpha = 0.7, position = "identity") +
+  scale_fill_manual(values = c("red", "blue"), labels = c("Negative", "Positive")) +
+  facet_wrap(~LINK_SENTIMENT, labeller = as_labeller(c("-1" = "Negative", "1" = "Positive"))) +
+  labs(
+    title = "Histogram of Number of Characters by Sentiment",
+    x = "Number of Characters",
+    y = "Count",
+    fill = "Sentiment"
+  ) +
+  theme_minimal()
+
+# Repeat similar for Number_of_words and Average_word_length if needed
+
+```
+
+2. Sentiment vs. Readability
+Explore whether positive or negative sentiment correlates with easier or harder readability scores.
+```{r}
+# T-test for readability scores (replace with your actual readability column)
+t_test_readability <- t.test(
+  Automated_readability_index ~ LINK_SENTIMENT,
+  data = df,
+  alternative = "two.sided"
+)
+
+# Print the t-test results
+print("T-test for Readability Scores:")
+print(t_test_readability)
+
+```
+
+Easier Readability for Negative Sentiment Posts:
+Negative sentiment posts tend to have lower readability scores, indicating that they are easier to read compared to positive sentiment posts.
+This could suggest that users expressing dissatisfaction or frustration use simpler language or sentence structures.
+
+```{r}
+# Boxplot for Readability Scores
+ggplot(df, aes(x = as.factor(LINK_SENTIMENT), y = Automated_readability_index, fill = as.factor(LINK_SENTIMENT))) +
+  geom_boxplot(alpha = 0.7, outlier.color = "black") +
+  scale_fill_manual(values = c("red", "blue"), labels = c("Negative", "Positive")) +
+  labs(
+    title = "Readability Scores by Sentiment",
+    x = "Sentiment",
+    y = "Readability Index",
+    fill = "Sentiment"
+  ) +
+  theme_minimal()
+
+```
+
+
+### Method 2 (similar findings):
+### Test each vector
+```{R}
+# Select numeric vector columns for analysis (replace with your actual column names)
+vector_features <- c("Number_of_characters", "Number_of_words", "Average_word_length", 
+                     "Fraction_of_alphabetical_characters", "Fraction_of_digits", 
+                     "LIWC_Posemo", "LIWC_Negemo")
+
+# Group by LINK_SENTIMENT and calculate the mean for each feature
+feature_sentiment_summary <- df %>%
+  group_by(LINK_SENTIMENT) %>%
+  summarize(across(all_of(vector_features), mean, na.rm = TRUE))
+
+# View the summary table
+print(feature_sentiment_summary)
+# Separate data for positive and negative sentiment
+positive_means <- feature_sentiment_summary %>% filter(LINK_SENTIMENT == 1)
+negative_means <- feature_sentiment_summary %>% filter(LINK_SENTIMENT == -1)
+
+# Calculate the differences between positive and negative sentiment for each feature
+feature_differences <- tibble(
+  Feature = vector_features,
+  Positive_Mean = as.numeric(positive_means[1, -1]),  # Exclude LINK_SENTIMENT column
+  Negative_Mean = as.numeric(negative_means[1, -1]),
+  Difference = as.numeric(positive_means[1, -1]) - as.numeric(negative_means[1, -1])
+)
+
+# Sort the features by the largest differences
+feature_differences <- feature_differences %>%
+  arrange(desc(abs(Difference)))
+
+# View the feature differences
+print(feature_differences)
+
+
+
+```
+
+```{r}
+# Plot the top 10 features with the largest differences
+top_features <- feature_differences %>%
+  slice_max(order_by = abs(Difference), n = 10)
+
+ggplot(top_features, aes(x = reorder(Feature, Difference), y = Difference, fill = Difference > 0)) +
+  geom_bar(stat = "identity") +
+  coord_flip() +
+  scale_fill_manual(values = c("red", "blue"), labels = c("Negative", "Positive")) +
+  labs(
+    title = "Top Features Associated with Positive and Negative Sentiment",
+    x = "Feature",
+    y = "Difference in Mean Value",
+    fill = "Sentiment"
+  ) +
+  theme_minimal()
+
+
+```
+
+
+##### Previous EDA and so on (ignore...)
+```{R}
+library(igraph)
+g <- graph_from_data_frame(df, directed = TRUE)
+# Extract unique vertices
+unique_vertices <- V(g)$name
+# Aggregate attributes for each vertex
+node_data <- df %>%
+  group_by(SOURCE_SUBREDDIT) %>% # or TARGET_SUBREDDIT, depending on your goal
+  summarize(
+    num_characters = mean(Number_of_characters, na.rm = TRUE),
+    num_words = mean(Number_of_words, na.rm = TRUE),
+    posemo = mean(LIWC_Posemo, na.rm = TRUE),
+    negemo = mean(LIWC_Negemo, na.rm = TRUE)
+  ) %>%
+  rename(vertex = SOURCE_SUBREDDIT) # Rename column to match the vertex attribute
+
+
+```
+
+```{r}
+# Plot distribution of LINK_SENTIMENT
+ggplot(df, aes(x = as.factor(LINK_SENTIMENT))) +
+  geom_bar(fill = c("blue", "red")) +
+  labs(
+    title = "Distribution of Link Sentiments",
+    x = "Sentiment",
+    y = "Frequency"
+  ) +
+  scale_x_discrete(labels = c("-1" = "Negative", "1" = "Positive")) +
+  theme_minimal()
+
+
+```
+```{r}
+# Group by source subreddit and sentiment
+subreddit_sentiment <- df %>%
+  group_by(SOURCE_SUBREDDIT, LINK_SENTIMENT) %>%
+  summarize(Frequency = n()) %>%
+  arrange(desc(Frequency))
+
+# Top subreddits with positive sentiment
+top_positive <- subreddit_sentiment %>%
+  filter(LINK_SENTIMENT == 1) %>%
+  top_n(10, Frequency)
+
+ggplot(top_positive, aes(x = reorder(SOURCE_SUBREDDIT, -Frequency), y = Frequency)) +
+  geom_bar(stat = "identity", fill = "blue") +
+  labs(
+    title = "Top Subreddits with Positive Sentiment",
+    x = "Subreddit",
+    y = "Frequency"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+# Top subreddits with negative sentiment
+top_negative <- subreddit_sentiment %>%
+  filter(LINK_SENTIMENT == -1) %>%
+  top_n(10, Frequency)
+
+ggplot(top_negative, aes(x = reorder(SOURCE_SUBREDDIT, -Frequency), y = Frequency)) +
+  geom_bar(stat = "identity", fill = "red") +
+  labs(
+    title = "Top Subreddits with Negative Sentiment",
+    x = "Subreddit",
+    y = "Frequency"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+```
+
+```{R}
+# Convert TIMESTAMP to Date
+df$Date <- as.Date(df$TIMESTAMP)
+
+# Group by date and sentiment
+temporal_sentiment <- df %>%
+  group_by(Date, LINK_SENTIMENT) %>%
+  summarize(Frequency = n())
+
+# Plot temporal trends of sentiments
+ggplot(temporal_sentiment, aes(x = Date, y = Frequency, color = as.factor(LINK_SENTIMENT))) +
+  geom_line() +
+  labs(
+    title = "Temporal Trends of Sentiment",
+    x = "Date",
+    y = "Frequency",
+    color = "Sentiment"
+  ) +
+  scale_color_manual(
+    values = c("-1" = "red", "1" = "blue"),
+    labels = c("-1" = "Negative", "1" = "Positive")
+  ) +
+  theme_minimal()
+
+```
+
+Select any of the feature to explore:
+```{R}
+# Boxplot: LINK_SENTIMENT vs. Number_of_words
+ggplot(df, aes(x = as.factor(LINK_SENTIMENT), y = Number_of_words, fill = as.factor(LINK_SENTIMENT))) +
+  geom_boxplot(alpha = 0.7) +
+  labs(
+    title = "Number of Words by Sentiment",
+    x = "Sentiment",
+    y = "Number of Words"
+  ) +
+  scale_fill_manual(values = c("-1" = "red", "1" = "blue")) +
+  theme_minimal()
+
+# Boxplot: LINK_SENTIMENT vs. Number_of_sentences
+ggplot(df, aes(x = as.factor(LINK_SENTIMENT), y = Number_of_sentences, fill = as.factor(LINK_SENTIMENT))) +
+  geom_boxplot(alpha = 0.7) +
+  labs(
+    title = "Number of Sentences by Sentiment",
+    x = "Sentiment",
+    y = "Number of Sentences"
+  ) +
+  scale_fill_manual(values = c("-1" = "red", "1" = "blue")) +
+  theme_minimal()
+
+```
+```{r}
+# Save the updated DataFrame to a CSV file
+output_path <- "updated_df.csv"  # Replace with your desired file path
+write.csv(df, file = output_path, row.names = FALSE)
+
+# Confirm the file has been saved
+cat("The DataFrame has been saved to:", output_path)
+
+```
+
+```{R}
+if (!require("igraph")) install.packages("igraph")
+library(igraph)
+# Create a directed graph from the subreddit data
+g <- graph_from_data_frame(df, directed = TRUE)
+
+# Print basic graph information
+print(g)
+# Calculate in-degree and out-degree centrality
+in_degree <- degree(g, mode = "in")
+out_degree <- degree(g, mode = "out")
+
+# Add centrality scores to graph nodes
+V(g)$in_degree <- in_degree
+V(g)$out_degree <- out_degree
+
+```
+```{R}
+# Find the node with the highest in-degree
+max_in_degree <- which.max(in_degree)
+highest_in_node <- V(g)$name[max_in_degree]
+
+cat("Subreddit with the highest In-Degree Centrality:", highest_in_node, "\n")
+cat("In-Degree Centrality:", in_degree[max_in_degree], "\n")
+
+# Find the node with the highest out-degree
+max_out_degree <- which.max(out_degree)
+highest_out_node <- V(g)$name[max_out_degree]
+
+cat("Subreddit with the highest Out-Degree Centrality:", highest_out_node, "\n")
+cat("Out-Degree Centrality:", out_degree[max_out_degree], "\n")
+
+```
+
+```{R}
+file_path <- "~/Downloads/soc-redditHyperlinks-title_.tsv"  # Replace with your file path
+title <- read_tsv(file_path)
+
+# View the structure of the dataset
+head(title)
+```
+
+
+```{r}
+if (!require("igraph")) install.packages("igraph")
+library(igraph)
+# Create a directed graph from the subreddit data
+g <- graph_from_data_frame(title, directed = TRUE)
+
+# Print basic graph information
+print(g)
+# Calculate in-degree and out-degree centrality
+in_degree <- degree(g, mode = "in")
+out_degree <- degree(g, mode = "out")
+
+# Add centrality scores to graph nodes
+V(g)$in_degree <- in_degree
+V(g)$out_degree <- out_degree
+
+# Find the node with the highest in-degree
+max_in_degree <- which.max(in_degree)
+highest_in_node <- V(g)$name[max_in_degree]
+
+cat("Subreddit with the highest In-Degree Centrality:", highest_in_node, "\n")
+cat("In-Degree Centrality:", in_degree[max_in_degree], "\n")
+
+# Find the node with the highest out-degree
+max_out_degree <- which.max(out_degree)
+highest_out_node <- V(g)$name[max_out_degree]
+
+cat("Subreddit with the highest Out-Degree Centrality:", highest_out_node, "\n")
+cat("Out-Degree Centrality:", out_degree[max_out_degree], "\n")
+```
+
+
+```{r}
+# Count interactions for each subreddit
+top_subreddits <- df %>%
+  group_by(SOURCE_SUBREDDIT) %>%
+  summarize(Interactions = n()) %>%
+  arrange(desc(Interactions)) %>%
+  head(10)
+
+# Bar plot for top subreddits
+ggplot(top_subreddits, aes(x = reorder(SOURCE_SUBREDDIT, -Interactions), y = Interactions)) +
+  geom_bar(stat = "identity", fill = "steelblue") +
+  labs(title = "Top 10 Subreddits by Interactions", x = "Subreddit", y = "Number of Interactions") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+```
+```{r}
+library(igraph)
+library(ggplot2)
+library(dplyr)
+
+# Step 1: Calculate centrality measures for the graph
+V(g)$degree <- igraph::degree(g, mode = "all")
+V(g)$betweenness <- igraph::betweenness(g)
+
+# Step 2: Create a data frame for centrality metrics
+centrality_data <- data.frame(
+  Subreddit = V(g)$name,
+  Degree = V(g)$degree,
+  Betweenness = V(g)$betweenness
+)
+
+# Step 3: Aggregate sentiment data for subreddits
+sentiment_data <- df %>%
+  group_by(SOURCE_SUBREDDIT) %>%
+  summarise(Avg_Sentiment = mean(LINK_SENTIMENT, na.rm = TRUE), .groups = "drop")
+
+# Step 4: Merge centrality metrics with sentiment data
+centrality_sentiment <- centrality_data %>%
+  left_join(sentiment_data, by = c("Subreddit" = "SOURCE_SUBREDDIT"))
+
+# Step 5: Replace NA values with 0 for Avg_Sentiment
+centrality_sentiment$Avg_Sentiment[is.na(centrality_sentiment$Avg_Sentiment)] <- 0
+
+# Step 6: Visualize the relationship between Degree and Avg_Sentiment
+ggplot(centrality_sentiment, aes(x = Degree, y = Avg_Sentiment)) +
+  geom_point(alpha = 0.7, color = "darkorange") +  # Transparent points for better visibility
+  geom_smooth(method = "lm", color = "darkblue", fill = "lightblue", se = TRUE) +  # Linear trend line with confidence interval
+  labs(
+    title = "Relationship Between Degree Centrality and Sentiment",
+    subtitle = "Higher degree centrality subreddits tend to have positive sentiment",
+    x = "Degree Centrality (Number of Connections)",
+    y = "Average Sentiment"
+  ) +
+  theme_minimal() +  # Clean and modern theme
+  theme(
+    plot.title = element_text(hjust = 0.5, size = 16, face = "bold"),
+    plot.subtitle = element_text(hjust = 0.5, size = 12),
+    axis.title = element_text(size = 12),
+    axis.text = element_text(size = 10)
+  )
+
+```
+```{R}
+set.seed(42)  # For reproducibility
+
+# Separate the dataset into two groups
+df_positive <- df %>% filter(LINK_SENTIMENT == 1)
+df_negative <- df %>% filter(LINK_SENTIMENT == -1)
+
+# Get the size of the smaller group (-1 group)
+min_size <- min(nrow(df_positive), nrow(df_negative))
+
+# Randomly sample from each group
+sampled_positive <- df_positive %>% sample_n(min_size)
+sampled_negative <- df_negative %>% sample_n(min_size)
+
+# Combine the balanced dataset
+df_balanced <- bind_rows(sampled_positive, sampled_negative)
+
+# Check the balance
+table(df_balanced$LINK_SENTIMENT)
+
+# Visualize the balanced data distribution
+ggplot(df_balanced, aes(x = as.factor(LINK_SENTIMENT), fill = as.factor(LINK_SENTIMENT))) +
+  geom_bar() +
+  labs(
+    title = "Balanced Sentiment Distribution",
+    x = "Sentiment",
+    y = "Frequency",
+    fill = "Sentiment"
+  ) +
+  theme_minimal()
+
+
+```
+
+```{R}
+library(igraph)
+library(ggplot2)
+library(dplyr)
+
+# Step 1: Balance the dataset
+set.seed(42)  # For reproducibility
+
+# Separate the dataset into two groups
+df_positive <- df %>% filter(LINK_SENTIMENT == 1)
+df_negative <- df %>% filter(LINK_SENTIMENT == -1)
+
+# Get the size of the smaller group (-1 group)
+min_size <- min(nrow(df_positive), nrow(df_negative))
+
+# Randomly sample from each group
+sampled_positive <- df_positive %>% sample_n(min_size)
+sampled_negative <- df_negative %>% sample_n(min_size)
+
+# Combine the balanced dataset
+df_balanced <- bind_rows(sampled_positive, sampled_negative)
+
+# Step 2: Create the graph
+g <- graph_from_data_frame(df_balanced[, c("SOURCE_SUBREDDIT", "TARGET_SUBREDDIT")], directed = TRUE)
+
+# Step 3: Calculate centrality measures for the graph
+V(g)$degree <- igraph::degree(g, mode = "all")
+V(g)$betweenness <- igraph::betweenness(g)
+
+# Step 4: Create a data frame for centrality metrics
+centrality_data <- data.frame(
+  Subreddit = V(g)$name,
+  Degree = V(g)$degree,
+  Betweenness = V(g)$betweenness
+)
+
+# Step 5: Aggregate sentiment data for subreddits from the balanced dataset
+sentiment_data <- df_balanced %>%
+  group_by(SOURCE_SUBREDDIT) %>%
+  summarise(Avg_Sentiment = mean(LINK_SENTIMENT, na.rm = TRUE), .groups = "drop")
+
+# Step 6: Merge centrality metrics with sentiment data
+centrality_sentiment <- centrality_data %>%
+  left_join(sentiment_data, by = c("Subreddit" = "SOURCE_SUBREDDIT"))
+
+# Step 7: Replace NA values with 0 for Avg_Sentiment
+centrality_sentiment$Avg_Sentiment[is.na(centrality_sentiment$Avg_Sentiment)] <- 0
+
+# Step 8: Visualize the relationship between Degree and Avg_Sentiment
+ggplot(centrality_sentiment, aes(x = Degree, y = Avg_Sentiment)) +
+  geom_point(alpha = 0.7, color = "darkorange") +  # Transparent points for better visibility
+  geom_smooth(method = "lm", color = "darkblue", fill = "lightblue", se = TRUE) +  # Linear trend line with confidence interval
+  labs(
+    title = "Relationship Between Degree Centrality and Sentiment",
+    subtitle = "Higher degree centrality subreddits tend to have negative sentiment",
+    x = "Degree Centrality (Number of Connections)",
+    y = "Average Sentiment"
+  ) +
+  theme_minimal() +  # Clean and modern theme
+  theme(
+    plot.title = element_text(hjust = 0.5, size = 16, face = "bold"),
+    plot.subtitle = element_text(hjust = 0.5, size = 12),
+    axis.title = element_text(size = 12),
+    axis.text = element_text(size = 10)
+  )
+
+```
+```{r}
+# Perform t-tests for text complexity features on the balanced dataset
+
+# Number_of_characters
+t_test_characters <- t.test(
+  Number_of_characters ~ LINK_SENTIMENT,
+  data = df_balanced,
+  alternative = "two.sided"
+)
+
+# Number_of_words
+t_test_words <- t.test(
+  Number_of_words ~ LINK_SENTIMENT,
+  data = df_balanced,
+  alternative = "two.sided"
+)
+
+# Average_word_length
+t_test_word_length <- t.test(
+  Average_word_length ~ LINK_SENTIMENT,
+  data = df_balanced,
+  alternative = "two.sided"
+)
+
+# Print results
+print("T-test for Number of Characters:")
+print(t_test_characters)
+
+print("T-test for Number of Words:")
+print(t_test_words)
+
+print("T-test for Average Word Length:")
+print(t_test_word_length)
+
+```
+
