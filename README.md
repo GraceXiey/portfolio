@@ -4,6 +4,8 @@
 ### Intro
 I recently graduated with a Master’s degree from Northwestern University, where I honed my skills in data science and business analysis. My passion lies in leveraging data to uncover actionable insights and drive impactful decision-making.
 
+
+
 Throughout my academic and professional journey, I’ve gained extensive experience working with cutting-edge tools and platforms, including Snowflake, GCP, and AWS. My most recent project involved building a chatbot powered by large language models (LLMs) to address healthcare patient inquiries for Northwestern Medicine, integrating natural language processing with real-world applications.
 
 In addition, I’ve worked at Breakthru Beverage Group, where I developed a recommendation system using data mining techniques to create personalized product suggestions. My previous experience at UIUC's Rail Transportation and Engineering Center involved safety and risk analysis, which strengthened my ability to tackle complex problems with data-driven solutions.
