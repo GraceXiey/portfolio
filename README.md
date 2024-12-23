@@ -41,6 +41,16 @@ Impact:
 
 By integrating authoritative medical knowledge and AI capabilities, CancerRAG enhances patient satisfaction, reduces anxiety, and optimizes clinician-patient communication.
 
+#### [AWS Amazon Review Sentiment Analysis](https://github.com/GraceXiey/portfolio/tree/main/AWS-Amazon-Sentiment-Analysis)
+
+We developed a real-time sentiment analysis application to classify Amazon customer reviews as positive, neutral, or negative. Built using NLP models (Simple Neural Network, CNN, LSTM) with GloVe embeddings, it provides actionable feedback for both buyers and sellers. We also piplined web scrapping inside Streamlit for outputing the real-time result by simply entering the website link from the product page.
+
+AWS Integration:
+
+Deployed the system on AWS using S3 for data storage, EC2 for model training, ECS for container orchestration, and CloudWatch for monitoring.
+Efficient pipeline for web scraping, data processing, and visualization.
+The application showcases robust NLP capabilities with seamless deployment on AWS, delivering insights to enhance product quality and customer satisfaction.
+
 #### [Subscription Churn Rate Analysis](https://github.com/GraceXiey/portfolio/tree/main/Subscription-Churn-Rate-Analysis) 
 
 This group project focused on developing business solutions for newspaper subscriptions, specifically analyzing factors influencing churn rates and strategies to enhance customer loyalty. Using R for exploratory data analysis and assumption testing, we examined the structural relationships of various attributes, refining the model by adding or excluding factors based on weighted results. We included our best prediction model and identified the key drivers of churn, such as post-trial frequency, and provided actionable marketing recommendations to improve retention.
@@ -80,15 +90,20 @@ Fake Face Detection: The Xception model outperformed custom CNNs, achieving supe
 
 Facial Expression Recognition: A custom CNN outperformed pretrained models (VGG16, ResNet50) in identifying emotions such as happy, sad, angry, and neutral.
 
-#### [AWS Amazon Review Sentiment Analysis](https://github.com/GraceXiey/portfolio/tree/main/AWS-Amazon-Sentiment-Analysis)
+#### [Reddit Social Network Analysis in R](https://github.com/GraceXiey/portfolio/tree/main/Social-Network-Analysis-Reddit)
 
-We developed a real-time sentiment analysis application to classify Amazon customer reviews as positive, neutral, or negative. Built using NLP models (Simple Neural Network, CNN, LSTM) with GloVe embeddings, it provides actionable feedback for both buyers and sellers. We also piplined web scrapping inside Streamlit for outputing the real-time result by simply entering the website link from the product page.
+We utilized Social Network Analysis (SNA) to examine the structure and dynamics of Reddit's interconnected subreddits. By analyzing hyperlink interactions, the study identified influential subreddits, explored community connectivity, and assessed sentiment dynamics.
 
-AWS Integration:
+Key Findings:
 
-Deployed the system on AWS using S3 for data storage, EC2 for model training, ECS for container orchestration, and CloudWatch for monitoring.
-Efficient pipeline for web scraping, data processing, and visualization.
-The application showcases robust NLP capabilities with seamless deployment on AWS, delivering insights to enhance product quality and customer satisfaction.
+Network Influence: Subreddits like "AskReddit" and "subredditdrama" emerged as key hubs based on centrality metrics, serving as information bridges and discussion drivers.
+
+Connectivity Patterns: Community clusters formed around shared themes (e.g., gaming, politics), highlighting the interconnectedness of niche interests.
+
+Sentiment Insights: Positive sentiments dominated hobby subreddits, while contentious topics like politics exhibited more negativity, aiding in toxicity detection.
+
+This analysis offers actionable insights for improving online engagement and fostering healthier digital communities.
+
 
 
 
