@@ -21,6 +21,26 @@ I’m eager to connect with fellow data science professionals and enthusiasts to
 
 ## Project Outline
 
+#### [RAG Based LLM Chatbot for Onocology Radiology Patient Queries](https://github.com/GraceXiey/portfolio/tree/main/Radiology-RAG-LLM-Chatbot)
+
+This project developed a Retrieval-Augmented Generation (RAG) chatbot to bridge communication gaps between patients and clinicians in radiation oncology. Leveraging LLaMA3.1 models, the system delivers personalized, empathetic, and accurate responses to patient queries, enhancing understanding of treatment plans, emotional support, and accessibility.
+
+Key Features:
+
+Advanced Retrieval: High-performance vector similarity search via FAISS for precise information retrieval.
+
+Dynamic Response Generation: Context-aware, nuanced answers powered by domain-specific LLMs.
+
+Empathetic Design: Tailored conversational flows for addressing sensitive medical topics.
+
+Streamlined Deployment: Built with FastAPI backend, FAISS integration, and Streamlit frontend for seamless interaction.
+
+Database Design: Initiate a storage place for inqury patient's bio info and query for comparison and also score ratings to further improve the answer with professional physicians review.
+
+Impact:
+
+By integrating authoritative medical knowledge and AI capabilities, CancerRAG enhances patient satisfaction, reduces anxiety, and optimizes clinician-patient communication.
+
 #### [Subscription Churn Rate Analysis](https://github.com/GraceXiey/portfolio/tree/main/Subscription-Churn-Rate-Analysis) 
 
 This group project focused on developing business solutions for newspaper subscriptions, specifically analyzing factors influencing churn rates and strategies to enhance customer loyalty. Using R for exploratory data analysis and assumption testing, we examined the structural relationships of various attributes, refining the model by adding or excluding factors based on weighted results. We included our best prediction model and identified the key drivers of churn, such as post-trial frequency, and provided actionable marketing recommendations to improve retention.
@@ -69,5 +89,6 @@ AWS Integration:
 Deployed the system on AWS using S3 for data storage, EC2 for model training, ECS for container orchestration, and CloudWatch for monitoring.
 Efficient pipeline for web scraping, data processing, and visualization.
 The application showcases robust NLP capabilities with seamless deployment on AWS, delivering insights to enhance product quality and customer satisfaction.
+
 
 
