@@ -25,4 +25,13 @@ I’m eager to connect with fellow data science professionals and enthusiasts to
 
 This group project focused on developing business solutions for newspaper subscriptions, specifically analyzing factors influencing churn rates and strategies to enhance customer loyalty. Using R for exploratory data analysis and assumption testing, we examined the structural relationships of various attributes, refining the model by adding or excluding factors based on weighted results. We included our best prediction model and identified the key drivers of churn, such as post-trial frequency, and provided actionable marketing recommendations to improve retention.
 
-#### 
+#### [Flight Trend in USA Data Visualizations](https://github.com/GraceXiey/portfolio/tree/main/Tableau-Flight-Trend-Analysis)
+
+We aimed to address flight delays in the U.S. to enhance efficiency and personalization for the Department of Transportation, with an emphasis on the impact of COVID-19 on domestic flights. We developed dynamic visualizations, including:
+
+- Map graphs with bar charts showing average delay times by airline across cities.
+- Pre- and post-COVID arrival delay comparisons by state.
+- Time-series analyses of daily average delays nationwide.
+- Flight path density maps centered on Chicago O'Hare International Airport.
+  
+These visualizations allowed for comparisons across timeframes, cities, holidays, and destinations. Key insights included identifying heavily delayed areas, the most efficient airlines by state, and notable patterns like Hawaii's heavy traffic but minimal delays.
