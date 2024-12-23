@@ -1,7 +1,7 @@
 # Grace Xie's Portfolio
 
 
-## Intro
+## **Intro**
 
 I recently graduated with a Master’s degree from Northwestern University, where I honed my skills in data science and business analysis. My passion lies in leveraging data to uncover actionable insights and drive impactful decision-making.
 
