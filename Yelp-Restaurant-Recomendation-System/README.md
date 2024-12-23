@@ -126,12 +126,6 @@ The effectiveness of the recommendation engine is inversely proportional to the 
 
 
 
-## Contributors
-- Ayush Agarwal
-- Kevin Li
-- Yumin Zhang
-- Grace Xie
-
 ## License
 This project is made available under the MIT License. For more details, see the [LICENSE](https://github.com/ayush9818/Restaurant-Recommendation-System/blob/main/LICENSE) file in the repository.
 
