@@ -57,6 +57,7 @@ Key findings identified private room types, number of bedrooms, and baths as sig
 We deployed a deep learning system for detecting fake faces and recognizing facial expressions, addressing challenges in domains like security, healthcare, and entertainment.
 
 Fake Face Detection: The Xception model outperformed custom CNNs, achieving superior accuracy despite imbalanced datasets.
+
 Facial Expression Recognition: A custom CNN outperformed pretrained models (VGG16, ResNet50) in identifying emotions such as happy, sad, angry, and neutral.
 
 
