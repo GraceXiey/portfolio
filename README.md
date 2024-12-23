@@ -21,7 +21,8 @@ I’m eager to connect with fellow data science professionals and enthusiasts to
 
 ## Project Outline
 
-#### Subscription Churn Rate Analysis 
+#### [Subscription Churn Rate Analysis](https://github.com/GraceXiey/portfolio/tree/main/Subscription-Churn-Rate-Analysis) 
+
 This group project focused on developing business solutions for newspaper subscriptions, specifically analyzing factors influencing churn rates and strategies to enhance customer loyalty. Using R for exploratory data analysis and assumption testing, we examined the structural relationships of various attributes, refining the model by adding or excluding factors based on weighted results. We included our best prediction model and identified the key drivers of churn, such as post-trial frequency, and provided actionable marketing recommendations to improve retention.
 
 #### 
