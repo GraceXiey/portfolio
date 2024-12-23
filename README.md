@@ -1,9 +1,12 @@
 # Grace Xie's Portfolio
 
 
-### Intro
+## Intro
 I recently graduated with a Master’s degree from Northwestern University, where I honed my skills in data science and business analysis. My passion lies in leveraging data to uncover actionable insights and drive impactful decision-making.
+
 <img width="416" alt="Screen Shot 2024-12-22 at 2 23 41 PM" src="https://github.com/user-attachments/assets/cf41054b-71a1-460d-8a91-384cdfe1ad91" />
+<img width="416" alt="Screen Shot 2024-12-22 at 2 23 41 PM" src="https://github.com/user-attachments/assets/5e37e465-7bc1-4968-8d6b-e97e1224c856" />
+
 
 
 Throughout my academic and professional journey, I’ve gained extensive experience working with cutting-edge tools and platforms, including Snowflake, GCP, and AWS. My most recent project involved building a chatbot powered by large language models (LLMs) to address healthcare patient inquiries for Northwestern Medicine, integrating natural language processing with real-world applications.
