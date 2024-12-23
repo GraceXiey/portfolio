@@ -41,10 +41,9 @@ These visualizations allowed for comparisons across timeframes, cities, holidays
 This project developed a dual-purpose Restaurant Recommendation System:
 
 For Customers: Personalized restaurant recommendations based on preferences, dining history, and location using a hybrid model combining Collaborative Filtering (KNN, KNNWithMeans, SVD) and Content-Based Filtering (BERT embeddings, TF-IDF).
+
 For Restaurant Owners: Data-driven insights to craft targeted advertisements via association rule mining on user reviews.
 
 Technical Highlights:
 
-Utilized a large-scale Yelp dataset (~1M entries) to train and test models.
-Evaluated system performance using Mean Squared Error (MSE) and Mean Absolute Error (MAE), aiming to minimize RMSE for enhanced prediction accuracy.
-We demonstrated the practical application of modern recommendation algorithms, improving customer dining experiences and optimizing marketing efforts for restaurants.
+Utilized a large-scale Yelp dataset (~1M entries) to train and test models. Evaluated system performance using Mean Squared Error (MSE) and Mean Absolute Error (MAE), aiming to minimize RMSE for enhanced prediction accuracy. We demonstrated the practical application of modern recommendation algorithms, improving customer dining experiences and optimizing marketing efforts for restaurants.
