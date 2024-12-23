@@ -47,6 +47,16 @@ For Restaurant Owners: Data-driven insights to craft targeted advertisements via
 We utilized a large-scale Yelp dataset (~1M entries) to train and test models. Evaluated system performance using Mean Squared Error (MSE) and Mean Absolute Error (MAE), aiming to minimize RMSE for enhanced prediction accuracy. We demonstrated the practical application of modern recommendation algorithms, improving customer dining experiences and optimizing marketing efforts for restaurants.
 
 #### [Airbnb Price Prediction](https://github.com/GraceXiey/portfolio/tree/main/R-NYC-Leasing-Price)
+
 This project analyzed factors influencing Airbnb pricing and developed a predictive model to assist hosts in setting optimal prices. Using adataset of 20,758 New York City listings, we employed machine learning techniques, including Linear Regression, Neural Networks, CART, and XGBoost. The XGBoost model demonstrated the best performance, achieving an R² of 0.755 and RMSE of 0.356.
 
 Key findings identified private room types, number of bedrooms, and baths as significant pricing factors. Recommendations include incorporating granular neighborhood data and socioeconomic characteristics to refine predictions and enhance the model's applicability across diverse geographies.
+
+#### [Deep Face Detection Deap Learning](https://github.com/GraceXiey/portfolio/tree/main/DL-fakeface)
+
+We deployed a deep learning system for detecting fake faces and recognizing facial expressions, addressing challenges in domains like security, healthcare, and entertainment.
+
+Fake Face Detection: The Xception model outperformed custom CNNs, achieving superior accuracy despite imbalanced datasets.
+Facial Expression Recognition: A custom CNN outperformed pretrained models (VGG16, ResNet50) in identifying emotions such as happy, sad, angry, and neutral.
+
+
