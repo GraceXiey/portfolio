@@ -60,4 +60,14 @@ Fake Face Detection: The Xception model outperformed custom CNNs, achieving supe
 
 Facial Expression Recognition: A custom CNN outperformed pretrained models (VGG16, ResNet50) in identifying emotions such as happy, sad, angry, and neutral.
 
+#### [AWS Amazon Review Sentiment Analysis](https://github.com/GraceXiey/portfolio/tree/main/AWS-Amazon-Sentiment-Analysis)
+
+We developed a real-time sentiment analysis application to classify Amazon customer reviews as positive, neutral, or negative. Built using NLP models (Simple Neural Network, CNN, LSTM) with GloVe embeddings, it provides actionable feedback for both buyers and sellers. We also piplined web scrapping inside Streamlit for outputing the real-time result by simply entering the website link from the product page.
+
+AWS Integration:
+
+Deployed the system on AWS using S3 for data storage, EC2 for model training, ECS for container orchestration, and CloudWatch for monitoring.
+Efficient pipeline for web scraping, data processing, and visualization.
+The application showcases robust NLP capabilities with seamless deployment on AWS, delivering insights to enhance product quality and customer satisfaction.
+
 
